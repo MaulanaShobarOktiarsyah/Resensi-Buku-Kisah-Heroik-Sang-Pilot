@@ -3,136 +3,149 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pembagian Kelompok Murid</title>
+<title>Pemilihan Kelompok 35 Murid 🌈</title>
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: linear-gradient(120deg, #f6d365, #fda085);
-        padding: 20px;
-        text-align: center;
-    }
-    h1 {
-        color: #fff;
-        text-shadow: 2px 2px 5px #555;
-    }
-    button {
-        padding: 10px 20px;
-        margin: 10px;
-        font-size: 16px;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        box-shadow: 2px 2px 5px #333;
-        transition: 0.3s;
-    }
-    button:hover {
-        transform: scale(1.1);
-    }
-    #kelompokTable {
-        margin: 20px auto;
-        border-collapse: collapse;
-        width: 90%;
-    }
-    #kelompokTable th, #kelompokTable td {
-        border: 1px solid #333;
-        padding: 10px;
-        text-align: center;
-        font-size: 14px;
-    }
-    .kelompokRow {
-        transition: all 0.5s;
-    }
+  body { 
+    font-family: Arial, sans-serif; 
+    padding: 20px; 
+    background: linear-gradient(135deg, #fdfbfb, #ebedee);
+  }
+  h2 { text-align: center; color: #333; }
+  input, button, label { margin: 5px 0; padding: 5px; font-size: 16px; }
+  button { cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; }
+  button:hover { background-color: #45a049; }
+  table { border-collapse: collapse; margin-top: 20px; width: 100%; }
+  th, td { border: 2px solid #333; padding: 10px; text-align: center; font-weight: bold; }
+  th { background-color: #ffcc00; }
+  td { transition: transform 0.2s; }
+  td:hover { transform: scale(1.1); }
 </style>
 </head>
 <body>
+<h2>🎉 Pemilihan Kelompok 35 Murid 🌈</h2>
 
-<h1>🎓 Pembagian Kelompok Murid 🎓</h1>
+<label>Jumlah kelompok:</label>
+<input type="number" id="groupCount" min="1" value="5"><br>
 
-<button onclick="acakKelompok()">🎲 Acak Kelompok</button>
-<button onclick="salinClipboard()">📋 Salin ke Clipboard</button>
+<input type="checkbox" id="keepGirlsTogether">
+<label for="keepGirlsTogether">Siswi tetap bersama 👧👧👧</label><br>
 
-<table id="kelompokTable">
-</table>
+<button onclick="generateGroups()">🎲 Acak Kelompok</button>
+<button onclick="copyGroups()">📋 Salin Kelompok</button>
+
+<div id="groupsContainer"></div>
 
 <script>
-let murid = [
-    "Murid1","Murid2","Murid3","Murid4","Murid5","Murid6","Murid7","Murid8",
-    "Murid9","Murid10","Murid11","Murid12","Murid13","Murid14","Murid15",
-    "Murid16","Murid17","Murid18","Murid19","Murid20","Murid21","Murid22",
-    "Murid23","Murid24","Murid25","Murid26","Murid27","Murid28","Murid29",
-    "Murid30","Murid31","Murid32"
-];
-let siswi = ["Siswi1","Siswi2","Siswi3"];
+  const putri = ["👧 Siswi 1","👧 Siswi 2","👧 Siswi 3"];
+  const putra = [];
+  for(let i=1;i<=32;i++){ putra.push("🧑 Murid " + i); }
 
-let jumlahPerKelompok = 4; // bisa diubah
+  const colors = ["#FFB6C1","#87CEFA","#90EE90","#FFD700","#FFA07A","#DA70D6","#40E0D0"];
+  let currentGroups = [];
 
-function shuffle(array) {
-    return array.sort(() => Math.random() - 0.5);
-}
+  function shuffle(array) {
+    return array.sort(()=>Math.random()-0.5);
+  }
 
-function acakKelompok() {
-    let muridShuffle = shuffle([...murid]);
-    let siswiShuffle = shuffle([...siswi]);
-    let kelompok = [];
+  function generateGroups(){
+    const numGroups = parseInt(document.getElementById('groupCount').value);
+    const keepGirlsTogether = document.getElementById('keepGirlsTogether').checked;
+    if(numGroups < 1){ alert('Masukkan jumlah kelompok valid!'); return; }
 
-    let siswiTersisa = [...siswiShuffle];
+    const totalParticipants = [...putra,...putri];
+    const baseSize = Math.floor(totalParticipants.length/numGroups);
+    const extra = totalParticipants.length % numGroups;
 
-    // Jika jumlah per kelompok >= 3 dan siswi 3 orang → tetap bersama
-    if(jumlahPerKelompok >= 3 && siswiTersisa.length === 3) {
-        let kelompokPertama = muridShuffle.splice(0, jumlahPerKelompok - 3);
-        kelompok.push([...kelompokPertama, ...siswiTersisa]);
-        siswiTersisa = [];
-    }
+    let shuffledPutra = shuffle([...putra]);
+    let shuffledPutri = shuffle([...putri]);
+    let groups = Array.from({length:numGroups},()=>[]);
 
-    // Bagi murid tersisa
-    while(muridShuffle.length > 0) {
-        kelompok.push(muridShuffle.splice(0, jumlahPerKelompok));
-    }
-
-    // Kalau jumlah per kelompok <3 atau siswi tersisa → siswi dicampur
-    if(jumlahPerKelompok < 3 || siswiTersisa.length > 0) {
-        for(let i=0; i<siswiTersisa.length; i++) {
-            let indexKel = i % kelompok.length;
-            kelompok[indexKel].push(siswiTersisa[i]);
+    // LOGIKA SISWI
+    if(keepGirlsTogether){
+      if(baseSize >= 3){ // Siswi tetap bersama
+        const girlGroupIndex = Math.floor(Math.random()*numGroups);
+        groups[girlGroupIndex] = [...shuffledPutri];
+        // Isi murid lainnya ke kelompok
+        let ptr=0;
+        for(let i=0;i<numGroups;i++){
+          let target = baseSize + (i<extra?1:0);
+          if(i===girlGroupIndex) target = Math.max(groups[i].length,target);
+          while(groups[i].length < target && ptr < shuffledPutra.length){
+            groups[i].push(shuffledPutra[ptr]); ptr++;
+          }
         }
-    }
-
-    tampilKelompok(kelompok);
-}
-
-function tampilKelompok(kelompok) {
-    let table = document.getElementById("kelompokTable");
-    table.innerHTML = "";
-    for(let i=0; i<kelompok.length; i++) {
-        let row = table.insertRow();
-        row.classList.add("kelompokRow");
-        let cell1 = row.insertCell();
-        cell1.innerHTML = `Kelompok ${i+1} 🎯`;
-        for(let j=0; j<kelompok[i].length; j++){
-            let cell = row.insertCell();
-            let warna = `hsl(${Math.random()*360},70%,80%)`;
-            cell.style.backgroundColor = warna;
-            cell.innerHTML = kelompok[i][j];
+      } else { // baseSize <3 → siswi dicampur
+        const allParticipants = shuffle([...putra,...putri]);
+        let ptr=0;
+        for(let i=0;i<numGroups;i++){
+          let target = baseSize + (i<extra?1:0);
+          while(groups[i].length<target && ptr<allParticipants.length){
+            groups[i].push(allParticipants[ptr]);
+            ptr++;
+          }
         }
-    }
-}
-
-function salinClipboard() {
-    let table = document.getElementById("kelompokTable");
-    let text = "";
-    for(let i=0;i<table.rows.length;i++){
-        let row = table.rows[i];
-        text += row.cells[0].innerText + ": ";
-        for(let j=1;j<row.cells.length;j++){
-            text += row.cells[j].innerText + " ";
+      }
+    } else { // Siswi dicampur
+      const allParticipants = shuffle([...putra,...putri]);
+      let ptr=0;
+      for(let i=0;i<numGroups;i++){
+        let target = baseSize + (i<extra?1:0);
+        while(groups[i].length<target && ptr<allParticipants.length){
+          groups[i].push(allParticipants[ptr]);
+          ptr++;
         }
-        text += "\n";
+      }
     }
-    navigator.clipboard.writeText(text).then(()=>{
-        alert("✅ Kelompok berhasil disalin ke clipboard!");
+
+    currentGroups = groups;
+    renderTable(groups);
+  }
+
+  function renderTable(groups){
+    const container = document.getElementById('groupsContainer');
+    container.innerHTML = '<h3>🌟 Hasil Kelompok:</h3>';
+    const table = document.createElement('table');
+
+    const headerRow = document.createElement('tr');
+    groups.forEach((g,i)=>{
+      const th = document.createElement('th');
+      th.textContent = `Kelompok ${i+1} 🎯`;
+      th.style.backgroundColor = colors[i % colors.length];
+      headerRow.appendChild(th);
     });
-}
-</script>
+    table.appendChild(headerRow);
 
+    const maxRows = Math.max(...groups.map(g=>g.length));
+    for(let r=0;r<maxRows;r++){
+      const row = document.createElement('tr');
+      groups.forEach((g,i)=>{
+        const td = document.createElement('td');
+        td.textContent = g[r]?g[r]:"";
+        td.style.backgroundColor = colors[i % colors.length]+"55";
+        row.appendChild(td);
+      });
+      table.appendChild(row);
+    }
+
+    container.appendChild(table);
+  }
+
+  function copyGroups(){
+    if(currentGroups.length === 0){ alert("Belum ada kelompok untuk disalin!"); return; }
+    let text = "";
+    currentGroups.forEach((g,i)=>{
+      text += `Kelompok ${i+1}:\n`;
+      g.forEach(murid=>{
+        text += `- ${murid}\n`;
+      });
+      text += "\n";
+    });
+    navigator.clipboard.writeText(text).then(()=>{
+      alert("✅ Kelompok berhasil disalin ke clipboard!");
+    }).catch(err=>{
+      alert("❌ Gagal menyalin kelompok: " + err);
+    });
+  }
+</script>
 </body>
 </html>
